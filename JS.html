@@ -1,0 +1,184 @@
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<script>
+var app = angular.module('mov', []);
+app.controller('Ctrl', function($scope) {
+  $scope.movs;
+  $scope.buscador;
+  $scope.ingreso=0;
+  $scope.gasto=0;
+  $scope.typeM;
+  $scope.balances;
+  $scope.navS;
+  $scope.action='';
+  $scope.dateIn;
+  $scope.amount;
+  $scope.descr;
+  $scope.movsTemp;
+  $scope.id;
+  $scope.loader;
+  $scope.validando;
+   this.$onInit = function () {
+    $scope.amount = 10;
+    $scope.loader = true;
+    $scope.buscador = "";
+    $scope.movsTemp = [];
+    $scope.validando = false;
+    $scope.descr = "";
+      $scope.reload();
+      $scope.setType('Gasto')
+      $scope.setNav('m');
+  };
+
+  $scope.setType = function(type){
+    $scope.typeM = type;
+    console.log('El codigo JS fue cargado:'+$scope.typeM);
+  }
+  $scope.setNav = function(nav){
+    console.log(nav);
+    $scope.navS = nav;
+  }
+   $scope.getData = function() {
+    $scope.loader = true;
+    google.script.run.withSuccessHandler(function(data) {
+    $scope.$apply(function () {
+      $scope.loader = false;
+    $scope.movs = data;
+    $scope.ingreso = $scope.sumC($scope.movs,"Ingreso");
+    $scope.gasto = $scope.sumC($scope.movs,"Gasto");
+      });
+    }).getMovement();
+  }
+
+  $scope.deleteRow = function(id){
+    console.log("Este se elimina"+id)
+    $scope.loader = true;
+    google.script.run.withSuccessHandler(r =>{
+        $scope.loader = false;
+        $scope.reload();
+        }).deleteRowById(id);
+  }
+  $scope.reload = function(){
+      $scope.getData();
+      $scope.getBalance();
+  }
+  $scope.getBalance = function() {
+    $scope.loader = true;
+    google.script.run.withSuccessHandler(function(data) {
+    $scope.$apply(function () {
+      $scope.loader = false;
+    $scope.balances = data;
+      });
+    }).getBalance();
+  }
+  $scope.openModal = function (action,ind,id){
+    //cleanValidator();
+    $scope.action = action;
+    console.log($scope.action)
+    if($scope.action === "e"){
+      $scope.id = id;
+      $scope.dateIn = new Date(formatDateG($scope.movs[ind][1]));
+      $scope.amount = parseInt($scope.movs[ind][2]);
+      $scope.typeM = $scope.movs[ind][3];
+      $scope.descr = $scope.movs[ind][4];
+    }else{
+      $scope.validando = false;
+      $scope.dateIn = new Date();
+      $scope.amount = 10;
+      $scope.typeM = 'Gasto'
+      $scope.descr = '';
+    }
+    console.log("modal: "+$scope.action)
+    $('#myModal').modal('show'); 
+    $('body').addClass('modal-open'); 
+  }
+  $scope.buscadorF = function(){
+    if($scope.movsTemp.length < $scope.movs.length){
+      $scope.movsTemp = $scope.movs;
+    }
+    if($scope.buscador.length > 0){
+    $scope.movs = $scope.movs.filter(item => item[5].toLowerCase().indexOf($scope.buscador.toLowerCase()) >= 0 || item[3].toLowerCase().indexOf($scope.buscador.toLowerCase()) >= 0 || item[4].toLowerCase().indexOf($scope.buscador.toLowerCase()) >= 0);
+    }else{
+      $scope.movs = $scope.movsTemp;
+    }
+    $scope.ingreso = $scope.sumC($scope.movs,"Ingreso");
+    $scope.gasto = $scope.sumC($scope.movs,"Gasto");
+  }
+  $scope.sumC =function(mov,tipe){
+    var m = 0;
+    for (let i = 0; i < mov.length; i++) {
+    if(mov[i][3] === tipe){
+      m = parseInt(mov[i][2])+m
+      }
+    }
+  return m;
+  }
+  $scope.validateToSend = function(){
+    var fecha = formatDateF($scope.dateIn);
+    console.log("Date In: "+fecha);
+    console.log("Date Generado: "+formatMes);
+    var dateIn = new Date(formatDateD(fecha));
+    var formatMes = convertMonth(dateIn.getMonth())+dateIn.getFullYear();
+    
+    $scope.loader = true;
+    if(validateData(formatDate(dateIn),$scope.amount,$scope.descr).filter(b => b === false).length === 0){
+        //cleanValidator();
+        const modal = bootstrap.Modal.getOrCreateInstance('#myModal');
+        modal.hide();
+      if($scope.action === 'a'){
+        console.log("Correcto: "+$scope.descr);
+        google.script.run.withSuccessHandler(result =>{
+        console.log("Correcto: "+$scope.descr);
+        $scope.reload();
+        $scope.loader = false;
+        $('#myModal').modal('hide'); 
+        //hide the modal
+        $('body').removeClass('modal-open'); 
+        //modal-open class is added on body so it has to be removed
+        $('.modal-backdrop').remove();
+        cleanValidator();
+        }).saveMovment($scope.typeM,formatDate(dateIn),$scope.amount,$scope.descr,convertMonth(dateIn.getMonth())+dateIn.getFullYear());
+      }else if($scope.action === 'e'){
+        google.script.run.withSuccessHandler(r =>{
+          console.log("Correcto: "+$scope.descr);
+        $scope.reload();
+        $('#myModal').modal('hide'); 
+        //hide the modal
+        $('body').removeClass('modal-open'); 
+        //modal-open class is added on body so it has to be removed
+        $('.modal-backdrop').remove();
+        cleanValidator();
+        $scope.loader = false;
+        }).editRow($scope.id,[formatDate(dateIn),$scope.amount,$scope.typeM,$scope.descr,formatMes])
+      }
+    }else{
+      $scope.loader = false;
+    }
+  }
+  function validateData(fecha,monto,etiqueta){
+    console.log(fecha)
+    $scope.validando = false;
+    var validator = new Array(5);
+    if(fecha === "NaN/NaN/NaN"){
+      validator.push(false);
+      $scope.validando = true;
+    }
+    if(monto <= 0){
+      validator.push(false);
+      $scope.validando = true;
+    }
+    if(etiqueta === ''){
+      validator.push(false);
+      $scope.descr = etiqueta;
+      $scope.validando = true;
+    }
+    return validator;
+  }
+  function cleanValidator(){
+    $('#descr','#amount','#dateIn').removeClass('field-void-text');
+    $scope.descr ="";
+    $scope.amount =10;
+  }
+
+  });
+</script>

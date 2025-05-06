@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <?!= include('css')?>
+  <?!= include('JS')?>
+  <?!= include('utils')?>
+</head>
+<div class="container conteiner-objs">
+  <div ng-app="mov" ng-controller="Ctrl">
+    <div>
+      <h1>Tabla de movimiento</h1>
+      <p>Aqui verás los movimientos de ingresos y gastos</p>
+    </div>
+    <div class="conteiner-section"  ng-if="navS == 'm'">
+      <div class="col-sm-4">
+        <button type="button" class="btn btn-outline-primary"  data-bs-target="#myModal" ng-click="openModal('a',0,0)">Agregar</button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div style="display: flex; margin-bottom:16px; margin-top:16px">
+        <div class="col-sm-6  nav-j btn btn-outline-primary" ng-click="setNav('m')" ng-class="{'nav-selected':navS == 'm'}">
+          <a>Movimientos</a>
+        </div>
+        <div class="col-sm-6  nav-j btn btn-outline-primary" ng-click="setNav('b')" ng-class="{'nav-selected':navS == 'b'}">
+          <a>Balance</a>
+        </div>
+    </div>
+    <!--Buscador-->
+    <div>
+      <div class="col-sm-4">
+      <div class="input-group mb-3">
+      <input type="text" class="form-control" placeholder="Escribe para buscar por tipo, descripcion o mes" aria-label="Escribe para buscar por tipo, descripcion o mes" aria-describedby="basic-addon2" ng-model="buscador" ng-change="buscadorF()">
+      <div class="input-group-append">
+      <button class="btn btn-outline-secondary" type="button" ng-click="buscadorF()">
+        <label ng-if="buscador.length > 0"> Buscar</label>
+        <label ng-if="buscador.length == 0">Recargar</label> 
+      </button>
+      </div>
+      </div>
+      </div>
+    </div>
+    <body>
+      <!-- Tabla de Movimientos -->
+      <table id="tableMov" class="table" ng-if="navS == 'm' && loader===false">
+        <thead>
+          <tr>
+            <th scope="col">id</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Monto</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Concepto</th>
+            <th scope="col">Mes</th>
+            <th scope="col">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        <tbody class="table-group-divider">
+          <tr ng-repeat="mo in movs track by $index">
+            <td class="fecha">{{mo[0]}}</td>
+            <td class="fecha">{{mo[1]}}</td>
+            <td class="monto">{{mo[2]}}</td>
+            <td class="tipo">{{mo[3]}}</td>
+            <td class="desc">{{mo[4]}}</td>
+            <td class="mes">{{mo[5]}}</td>
+            <td class="accion">
+              <button href="#" class="btn btn-info btn-sm" ng-click="deleteRow(mo[0])" style="background-color: #ffc4d6;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3-fill" viewBox="0 0 16 16">
+                <path d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5m-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5M4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06m6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528M8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5"/>
+                </svg>
+                Borrar
+              </button>
+              <button href="#" class="btn btn-info btn-sm" ng-click="openModal('e',$index,mo[0])" style="background-color: #ffc4d6;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                </svg>
+                Editar
+              </button>
+              <i class="bi bi-pencil"></i>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Gasto: {{gasto}}</td>
+            <td>Ingreso: {{ingreso}}</td>
+            <td>Balance: {{ingreso-gasto}}</td>
+          <tr>
+        </tbody>
+        </tbody>
+      </table>
+      <!-- Tabla de Balances -->
+      <table id="tableBal" class="table" ng-if="navS == 'b' && loader===false">
+        <thead>
+          <tr>
+            <th scope="col">Mes</th>
+            <th scope="col">Ingreso</th>
+            <th scope="col">Gasto</th>
+            <th scope="col">Balance</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        <tbody class="table-group-divider">
+          <tr ng-repeat="b in balances">
+            <td class="fecha">{{b[0]}}</td>
+            <td class="monto">{{b[1]}}</td>
+            <td class="tipo">{{b[2]}}</td>
+            <td class="desc">{{b[3]}}</td>
+          </tr>
+        </tbody>
+        </tbody>
+      </table>
+    </body>
+    <!-- Loader -->
+   <div class="col-md-12" style="display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column-reverse;" ng-if="loader===true">
+        <div class="spinner-grow text-danger" style="height:100px; width:100px"></div>
+    </div>
+    <!-- The Modal -->
+    <div class="modal fade" id="myModal">
+    <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Agregar Movimiento</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <!-- Modal body -->
+      <div class="modal-body">
+        <div data-mdb-input-init class="form-outline">
+          <label class="form-label" for="typeNumber">Fecha</label>
+          <input type="date" id="dateIn" ng-model="dateIn" class="form-control" />
+        </div>
+        <div data-mdb-input-init class="form-outline">
+          <label class="form-label" for="typeNumber">Monto</label>
+          <input type="number" id="amount" ng-model="amount" class="form-control" min = "10" ng-class="{'field-void-text':(amount == 0 || amount == null) && validando }"/>
+        </div>
+        <div data-mdb-input-init class="form-outline">
+          <label class="form-label" for="typeNumber">Tipo</label>
+          <div class="row">
+            <input type="radio" class="btn-check" name="options-outlined" id="success-outlined" autocomplete="off">
+            <label class="btn btn-outline-success" for="success-outlined" ng-click="setType('Ingreso')" ng-class="{'check-ingreso':typeM == 'Ingreso'}">Ingreso</label>
+            <input type="radio" class="btn-check" name="options-outlined" id="danger-outlined" autocomplete="off">
+            <label class="btn btn-outline-danger" for="danger-outlined" ng-click="setType('Gasto')" ng-class="{'check-gasto':typeM == 'Gasto'}" >Gasto</label>
+          </div>
+        </div>
+        <div data-mdb-input-init class="form-outline">
+          <label class="form-label" for="typeNumber" >Descripción</label>
+          <input type="text" id="descr" class="form-control" ng-class="{'field-void-text':descr == '' && validando }" ng-model="descr" />
+        </div>
+      </div>
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secundary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" ng-click="validateToSend()">Guardar</button>
+      </div>
+    </div>
+    </div>
+</div>
+</div>
+</div>
+</html>

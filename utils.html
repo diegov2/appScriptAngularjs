@@ -1,0 +1,84 @@
+<script>
+  function formatDateD(dateIn){
+    console.log(dateIn);
+    var dateSplice = dateIn.split("/");
+    const yyyy = dateSplice[2];
+    let mm = parseInt(dateSplice[1])+ 1; // Months start at 0!
+    let dd = parseInt(dateSplice[0]);
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+    return dM = yyyy + '-' + mm + '-' + dd+"T06:00:00.000Z";
+  }
+  function formatDate(dateIn){
+    const yyyy = dateIn.getFullYear();
+    let mm = dateIn.getMonth() + 1; // Months start at 0!
+    let dd = dateIn.getDate();
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+    return dM = dd + '/' + mm + '/' + yyyy;
+  }
+   function formatDateF(dateIn){
+    var yyyy;
+    var mm;// Months start at 0!
+    var dd;
+    try{
+      yyyy = dateIn.getFullYear();
+      mm = dateIn.getMonth(); // Months start at 0!
+      dd = dateIn.getDate();
+      if (dd < 10) dd = '0' + dd;
+      if (mm < 10) mm = '0' + mm;
+    }catch(e){
+      var d = new Date();
+      yyyy = d.getFullYear();
+      mm = d.getMonth(); // Months start at 0!
+      dd = d.getDate();
+      if (dd < 10) dd = '0' + dd;
+      if (mm < 10) mm = '0' + mm;
+    }
+    return dd + '/' + mm + '/' + yyyy;
+  }
+  function formatDateG(dateIn){
+    console.log(dateIn);
+    var dateSplice = dateIn.split("/");
+    const yyyy = dateSplice[2];
+    let mm = parseInt(dateSplice[1]); // Months start at 0!
+    let dd = parseInt(dateSplice[0]);
+    if (dd < 10) dd = '0' + dd;
+    if (mm < 10) mm = '0' + mm;
+    return dM = yyyy + '-' + mm + '-' + dd+"T06:00:00.000Z";
+  }
+  function convertMonth(ms){
+    let m = Math.round(ms);
+    var mounth;
+    if(m > 0 || m <12){
+      if(m == 0){
+        mounth = "Enero";
+      }else if(m == 1){
+        mounth = "Febrero";
+      }else if(m == 2){
+        mounth = "Marzo";
+      }else if(m == 3){
+        mounth = "Abril";
+      }else if(m == 4){
+        mounth = "Mayo";
+      }else if(m == 5){
+        mounth = "Junio";
+      }else if(m == 6){
+        mounth = "Julio";
+      }else if(m == 7){
+        mounth = "Agosto";
+      }else if(m == 8){
+        mounth = "Septiembre";
+      }else if(m == 9){
+        mounth = "Octubre";
+      }else if(m == 10){
+        mounth = "Noviembre";
+      }else if(m == 11){
+        mounth = "Diciembre";
+      }
+    }else{
+      mounth = "No valido"
+    }
+    return mounth;
+  }
+</script>
